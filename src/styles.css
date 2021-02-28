@@ -2,7 +2,35 @@ table{
     border: 3px black solid;
 }
 
+.table-container{
+    margin-top: 100px;
+}
+
 th, td {
     border: 1px black solid;
     padding: 2px;
 }
+
+th{
+    cursor: pointer;
+}
+
+.loading-bg{
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    left: 0;
+    top: 0px;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.loading-body{
+    background-color: white;
+    padding: 30px;
+    border-radius: 5px;
+}
+

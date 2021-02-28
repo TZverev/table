@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
+import filterFunc from './storage/filter';
 
 
 function TD(props) {
@@ -14,6 +15,7 @@ function TD(props) {
                         </td>
                     )
                 }
+                return <td key={key}>No data</td>
             })}
         </>
     );
@@ -26,11 +28,15 @@ function TH(props) {
             {arr.map((key) => {
                 if (typeof key === 'string') {
                     return (
-                        <th key={key}>
+                        <th key={key}
+                            onClick={() => {
+                                props.sortFunc(props.data, key)
+                            }}>
                             { key}
                         </th>
                     )
                 }
+                return false
             })}
         </>
     );
@@ -38,27 +44,81 @@ function TH(props) {
 
 function Table(props) {
 
+    const [direction, setDirection] = useState(true);
+
+    const size = 50;
+    const i = 0;
+
+    const data = props.sortedData.slice((i * size), (i * size) + size);
+    const mainData = props.mainData;
+
+    function onSortData(arr, id) {
+        function compare(a, b, key = id) {
+            if (direction) {
+                setDirection(!direction);
+                if (a[key] > b[key]) return 1;
+                if (a[key] === b[key]) return 0;
+                if (a[key] < b[key]) return -1;
+            } else {
+                setDirection(!direction);
+                if (a[key] > b[key]) return -1;
+                if (a[key] === b[key]) return 0;
+                if (a[key] < b[key]) return 1;
+            }
+        };
+        arr = arr.sort(compare);
+        props.onSortData(arr);
+    }
+
     return (
-        <table>
-            <tbody>
-                <tr>
-                    <TH obj={props.data[0]} />
-                </tr>
-                {props.data.map((obj) => {
-                    return (
-                        <tr key={obj.id + obj.id}>
-                            <TD obj={obj} />
+        <div className='table-container'>
+            {props.isLoading &&
+                <div className='loading-bg'>
+                    <div className='loading-body'>
+                        Loading...
+                    </div>
+                </div>
+            }
+            {data.length ?
+                <table>
+                    <tbody>
+                        <tr>
+                            <TH obj={data[0]}
+                                sortFunc={onSortData}
+                                data={mainData} />
                         </tr>
-                    )
-                })}
-            </tbody>
-        </table>
+                        {data.map((obj, index) => {
+                            return (
+                                <tr key={obj.firstName + obj.id + index}>
+                                    <TD obj={obj} />
+                                </tr>
+                            )
+                        })}
+                    </tbody>
+                </table>
+                :
+                <div>
+                    No data
+                </div>
+            }
+        </div>
     );
 };
 
 export default connect(
     state => ({
-        data: state
+        sortedData: filterFunc(state),
+        mainData: state.data,
+        isLoading: state.isLoading,
     }),
-    dispatch => ({}),
+    dispatch => ({
+        onSortData: (arr) => {
+            dispatch({ type: 'LOADING_START' });
+            dispatch({
+                type: 'SORT_DATA',
+                data: arr.concat([]),
+            })
+            dispatch({ type: 'LOADING_FINISHED' });
+        },
+    }),
 )(Table);

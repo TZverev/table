@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { connect } from 'react-redux';
 
 function Header(props) {
-
-    const [status, setStatus] = useState('');
+    const [lastRequest, setLastRequest] = useState(null);
 
     function onGetLowData() {
         const url = 'http://www.filltext.com/?rows=32&id={number|1000}&firstName={firstName}&lastName={lastName}&email={email}&phone={phone|(xxx)xxx-xx-xx}&address={addressObject}&description={lorem|32}';
@@ -15,6 +14,11 @@ function Header(props) {
         props.onGetData(url);
     };
 
+    function onSaveFilter(value) {
+        clearTimeout(lastRequest);
+        setLastRequest(setTimeout(() => { props.onSetFilter(value) }, 500));
+    }
+
     return (
         <header>
             <button onClick={onGetLowData}>
@@ -23,9 +27,8 @@ function Header(props) {
             <button onClick={onGetBigData}>
                 Get big data
             </button>
-            <div>
-                {status}
-            </div>
+            <input onChange={(e) => { onSaveFilter(e.target.value) }}
+                placeholder='Searching' />
         </header>
     );
 };
@@ -36,6 +39,7 @@ export default connect(
     dispatch => ({
         onGetData: async function (url) {
             let data;
+            dispatch({ type: 'LOADING_START' });
             const response = await fetch(url);
             if (response.ok) {
                 data = await response.json();
@@ -43,10 +47,20 @@ export default connect(
                     type: 'GET_DATA',
                     data: data,
                 });
+                dispatch({ type: 'LOADING_FINISHED' });
                 return response.status;
             } else {
+                dispatch({ type: 'LOADING_FINISHED' });
                 return response.status;
             };
         },
+        onSetFilter: (string) => {
+            dispatch({ type: 'LOADING_START' });
+            dispatch({
+                type: 'SAVE_FILTER',
+                filter: string,
+            })
+            dispatch({ type: 'LOADING_FINISHED' });
+        }
     }),
 )(Header);
