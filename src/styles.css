@@ -15,6 +15,16 @@ th{
     cursor: pointer;
 }
 
+header{
+    display: flex;
+    align-items: center;
+    height: 30px;
+}
+
+button, input{
+    margin: 10px;
+}
+
 .loading-bg{
     z-index: 1000;
     display: flex;
@@ -32,5 +42,10 @@ th{
     background-color: white;
     padding: 30px;
     border-radius: 5px;
+}
+
+.button-wrapper{
+    display: flex;
+    align-items: center;
 }
 

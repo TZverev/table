@@ -47,7 +47,7 @@ function Table(props) {
     const [direction, setDirection] = useState(true);
 
     const size = 50;
-    const i = 0;
+    const i = props.page;
 
     const data = props.sortedData.slice((i * size), (i * size) + size);
     const mainData = props.mainData;
@@ -110,6 +110,7 @@ export default connect(
         sortedData: filterFunc(state),
         mainData: state.data,
         isLoading: state.isLoading,
+        page: state.currentPage,
     }),
     dispatch => ({
         onSortData: (arr) => {

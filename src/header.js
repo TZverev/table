@@ -19,6 +19,13 @@ function Header(props) {
         setLastRequest(setTimeout(() => { props.onSetFilter(value) }, 500));
     }
 
+    function onNextPage() {
+        if (props.currentPage >= props.pages - 1) {
+            return false;
+        };
+        props.onNextPage();
+    };
+
     return (
         <header>
             <button onClick={onGetLowData}>
@@ -29,17 +36,32 @@ function Header(props) {
             </button>
             <input onChange={(e) => { onSaveFilter(e.target.value) }}
                 placeholder='Searching' />
+            <div className='button-wrapper'>
+                <button onClick={props.onPreviousPage}>
+                    {'<-'}
+                </button>
+                <p>
+                    {props.currentPage + 1 + ' / ' + props.pages}
+                </p>
+                <button onClick={onNextPage}>
+                    {'->'}
+                </button>
+            </div>
         </header>
     );
 };
 
 
 export default connect(
-    state => ({}),
+    state => ({
+        pages: Math.ceil(state.data.length / 50),
+        currentPage: state.currentPage,
+    }),
     dispatch => ({
         onGetData: async function (url) {
             let data;
             dispatch({ type: 'LOADING_START' });
+            dispatch({ type: 'FIRST_PAGE' });
             const response = await fetch(url);
             if (response.ok) {
                 data = await response.json();
@@ -61,6 +83,16 @@ export default connect(
                 filter: string,
             })
             dispatch({ type: 'LOADING_FINISHED' });
+        },
+        onNextPage: () => {
+            dispatch({
+                type: 'NEXT_PAGE',
+            });
+        },
+        onPreviousPage: () => {
+            dispatch({
+                type: 'PREVIOUS_PAGE',
+            })
         }
     }),
 )(Header);
