@@ -79,6 +79,11 @@ function Table(props) {
                     </div>
                 </div>
             }
+            {props.error &&
+                <p>
+                    Error
+                </p>
+            }
             {data.length ?
                 <table>
                     <tbody>
@@ -107,10 +112,11 @@ function Table(props) {
 
 export default connect(
     state => ({
-        sortedData: filterFunc(state),
-        mainData: state.data,
-        isLoading: state.isLoading,
+        sortedData: filterFunc(state.data.state, state.filter),
+        mainData: state.data.state,
+        isLoading: state.data.isLoading,
         page: state.currentPage,
+        error: state.data.error,
     }),
     dispatch => ({
         onSortData: (arr) => {

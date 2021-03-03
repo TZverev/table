@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
+import filterFunc from './storage/filter';
 
 function Header(props) {
     const [lastRequest, setLastRequest] = useState(null);
@@ -54,35 +55,31 @@ function Header(props) {
 
 export default connect(
     state => ({
-        pages: Math.ceil(state.data.length / 50),
+        pages: Math.ceil(filterFunc(state.data.state, state.filter).length / 50),
         currentPage: state.currentPage,
     }),
     dispatch => ({
         onGetData: async function (url) {
-            let data;
-            dispatch({ type: 'LOADING_START' });
-            dispatch({ type: 'FIRST_PAGE' });
-            const response = await fetch(url);
-            if (response.ok) {
-                data = await response.json();
+            dispatch({ type: 'REQUESTED_DATA' });
+            dispatch({ type: 'FIRST_PAGE' })
+            try {
+                let response = await fetch(url);
+                let json = await response.json();
                 dispatch({
-                    type: 'GET_DATA',
-                    data: data,
-                });
-                dispatch({ type: 'LOADING_FINISHED' });
-                return response.status;
-            } else {
-                dispatch({ type: 'LOADING_FINISHED' });
-                return response.status;
+                    type: 'REQUESTED_DATA_SUCCEEDED',
+                    data: json,
+                })
+            } catch {
+                dispatch({
+                    type: 'REQUESTED_DATA_FAILED',
+                })
             };
         },
         onSetFilter: (string) => {
-            dispatch({ type: 'LOADING_START' });
             dispatch({
                 type: 'SAVE_FILTER',
                 filter: string,
             })
-            dispatch({ type: 'LOADING_FINISHED' });
         },
         onNextPage: () => {
             dispatch({
